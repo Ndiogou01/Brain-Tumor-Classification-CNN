@@ -1,5 +1,24 @@
-# Brain-Tumor-Classification-CNN
-Classification de tumeurs cérébrales par CNN (Précision 98%) | Projet de Deep Learning pour l'analyse d'images médicales (IRM). Développé avec TensorFlow/Keras.
+# Classification de Tumeurs Cérébrales par CNN (Précision 98%)
+
+Projet collaboratif réalisé avec **Ibrahima Diallo** dans le cadre du cours de Data Mining.
+
+## 🧠 Présentation du Projet
+Ce projet porte sur la classification d'images cérébrales (Gliome, Méningiome, Hypophyse ou Absence de tumeur) via une approche de Deep Learning.
+
+### Étapes principales :
+- **Prétraitement :** Redimensionnement, normalisation et augmentation de données (Data Augmentation).
+- **Architecture du CNN :** 
+  - Couches de **Conv2D** pour l'extraction automatique des caractéristiques.
+  - Activation **ReLU** pour introduire la non-linéarité.
+  - **Max Pooling** pour réduire la dimensionnalité tout en conservant les traits importants.
+  - **Flattening** et couches **Denses** pour la classification finale.
+- **Résultats :** Précision de **98%** sur l'ensemble de test en utilisant l'optimiseur Adam.
+
+## 🛠 Technologies utilisées
+- **Framework :** TensorFlow / Keras
+- **Environnement :** Jupyter Notebook (Python)
+- **Visualisation :** Matplotlib, Seaborn
+
 # 💫 About Me:
 Hi, I'm Souleymane Ndiogou SY, a Junior Full-Stack Developer & AI Enthusiast based in Saint-Louis, Senegal. Currently pursuing my Master’s in MIAGE at Gaston Berger University.<br>I specialize in building scalable web applications and integrating Machine Learning solutions to solve real-world problems. From architecting backends with Spring Boot and Symfony to crafting responsive UIs with Angular and React, I love bridging the gap between complex data and user-friendly interfaces.
 
