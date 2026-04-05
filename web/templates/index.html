@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrainInsight | Classification de Tumeurs Cérébrales</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              500: '#2563eb',
+              600: '#1d4ed8',
+            },
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #fcf9f8;
+    }
+    
+    #drop-zone.drag-over {
+      background-color: #e0f2fe;
+      border-color: #2563eb;
+    }
+    
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #2563eb;
+    }
+    
+    .header-logo-icon {
+      background-color: #2563eb;
+      color: white;
+      padding: 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+      font-size: 1.25rem;
+    }
+    
+    .section-title i {
+      color: #2563eb;
+    }
+    
+    .image-preview-container {
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+    }
+    
+    .upload-section, .result-section {
+      padding: 2rem;
+    }
+    
+    @media (min-width: 768px) {
+      .upload-section {
+        border-right: 1px solid #e2e8f0;
+      }
+    }
+    
+    /* Styles pour la modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background-color: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #64748b;
+    }
+    
+    .close-btn:hover {
+      color: #374151;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <header class="bg-white py-2 px-4 shadow-sm">
+    <div class="max-w-7xl mx-auto">
+      <div class="header-logo">
+        <div class="header-logo-icon">
+          <i class="fas fa-brain"></i>
+        </div>
+        <span>BrainInsight</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-9xl mx-auto py-6 px-4">
+    <div class="md:flex bg-white rounded-lg shadow-sm">
+      <div class="md:w-1/2 upload-section">
+        <h2 class="section-title">
+          <i class="fas fa-upload"></i> Importer une image IRM
+        </h2>
+        
+        <div 
+          id="drop-zone" 
+          class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:bg-gray-50"
+        >
+          <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+          <h3 class="text-lg font-medium text-gray-700">Cliquez ou glissez-déposez</h3>
+          <p class="text-sm text-gray-500 mt-2">Formats supportés: JPG, PNG, DICOM</p>
+          <input type="file" id="file" class="hidden" accept="image/*">
+        </div>
+        
+        <div class="mt-6">
+          <button id="predict-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <i class="fas fa-search"></i> Analyser l'image
+          </button>
+        </div>
+        
+        <div class="mt-6 bg-gray-50 rounded-xl p-5 border border-gray-200">
+          <h3 class="font-medium text-gray-700 flex items-center gap-2">
+            <i class="fas fa-diagnoses text-blue-600"></i> Statut de l'analyse:
+          </h3>
+          <div id="status" class="mt-3 text-center text-lg font-medium text-blue-600 py-4 fade-in">
+            En attente d'analyse...
+          </div>
+        </div>
+          
+        <div id="loader" class="mt-6 hidden">
+          <div class="flex items-center justify-center">
+            <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="ml-4 text-gray-600">Analyse en cours...</p>
+          </div>
+        </div>  
+      </div>
+      
+      <div class="md:w-1/2 result-section">
+        <h2 class="section-title">
+          <i class="fas fa-chart-line"></i> Aperçu de l'image
+        </h2>
+        
+        <div class="bg-gray-100 image-preview-container flex items-center justify-center overflow-hidden" id="image-preview">
+          <div class="text-center text-gray-500">
+            <i class="fas fa-image text-4xl"></i>
+          </div>
+        </div>        
+      </div>
+    </div>
+  </main>
+  
+  <!-- Modal pour afficher les résultats -->
+  <div id="result-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-diagnoses text-blue-600"></i> Résultat de l'analyse
+        </h3>
+        <button class="close-btn" id="close-modal">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="result" class="text-center text-2xl font-bold py-4 fade-in">
+          <!-- Le résultat sera inséré ici -->
+        </div>
+        <div id="confidence" class="text-center text-gray-600 mt-2">
+          <!-- La précision sera insérée ici -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="close-modal-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <footer class="bg-gray-100 py-4 mt-8 text-center text-sm text-gray-600 border-t border-gray-200">
+    <p>BrainInsight &copy; 2025</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.getElementById('file');
+      const dropZone = document.getElementById('drop-zone');
+      const predictBtn = document.getElementById('predict-btn');
+      const imagePreview = document.getElementById('image-preview');
+      const statusDiv = document.getElementById('status');
+      const resultDiv = document.getElementById('result');
+      const confidenceDiv = document.getElementById('confidence');
+      const loader = document.getElementById('loader');
+      const resultModal = document.getElementById('result-modal');
+      const closeModalBtn = document.getElementById('close-modal-btn');
+      const closeModalIcon = document.getElementById('close-modal');
+      
+      // Gestion de l'ouverture/fermeture de la modal
+      function openModal() {
+        resultModal.style.display = 'flex';
+      }
+      
+      function closeModal() {
+        resultModal.style.display = 'none';
+      }
+      
+      closeModalBtn.addEventListener('click', closeModal);
+      closeModalIcon.addEventListener('click', closeModal);
+      
+      // Fermer la modal en cliquant en dehors
+      window.addEventListener('click', (e) => {
+        if (e.target === resultModal) {
+          closeModal();
+        }
+      });
+      
+      dropZone.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      dropZone.addEventListener('dragenter', () => {
+        dropZone.classList.add('drag-over');
+      });
+      
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+      
+      dropZone.addEventListener('drop', (e) => {
+        dropZone.classList.remove('drag-over');
+        const files = e.dataTransfer.files;
+        if (files.length) {
+          fileInput.files = files;
+          handleFileSelection(files[0]);
+        }
+      });
+      
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+          handleFileSelection(fileInput.files[0]);
+        }
+      });
+      
+      function handleFileSelection(file) {
+        if (!file.type.match('image.*')) {
+          alert('Veuillez sélectionner une image valide.');
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-contain fade-in" alt="Aperçu de l'IRM">`;
+        };
+        reader.readAsDataURL(file);
+        
+        predictBtn.disabled = false;
+        
+        statusDiv.textContent = 'Prêt pour l\'analyse';
+        statusDiv.className = 'mt-3 text-center text-lg font-medium text-blue-600 py-4 fade-in';
+      }
+      
+      predictBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        if (!fileInput.files.length) return;
+        
+        loader.classList.remove('hidden');
+        statusDiv.textContent = 'Analyse en cours...';
+        
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        
+        try {
+          const response = await fetch('/predict', {
+            method: 'POST',
+            body: formData
+          });
+          
+          const data = await response.json();
+          
+          if (data.prediction) {
+            const hasTumor = data.prediction.toLowerCase().includes('tumor');
+            resultDiv.textContent = `${data.prediction}`;
+            
+            if (hasTumor) {
+              resultDiv.className = 'text-center text-2xl font-bold py-4 text-red-600 fade-in';
+            } else {
+              resultDiv.className = 'text-center text-2xl font-bold py-4 text-green-600 fade-in';
+            }
+            
+            if (data.confidence) {
+              confidenceDiv.textContent = `Précision: ${(data.confidence * 100).toFixed(2)}%`;
+            } else {
+              confidenceDiv.textContent = '';
+            }
+            
+            // Ouvrir la modal avec les résultats
+            openModal();
+          } else if (data.error) {
+            resultDiv.textContent = `Erreur: ${data.error}`;
+            resultDiv.className = 'text-center text-2xl font-bold text-red-600 py-4 fade-in';
+            confidenceDiv.textContent = '';
+            openModal();
+          }
+        } catch (error) {
+          resultDiv.textContent = 'Erreur de connexion au serveur';
+          resultDiv.className = 'text-center text-2xl font-bold text-red-600 py-4 fade-in';
+          confidenceDiv.textContent = '';
+          openModal();
+          console.error('Error:', error);
+        } finally {
+          loader.classList.add('hidden');
+          statusDiv.textContent = 'Analyse terminée';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
