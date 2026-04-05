@@ -2,7 +2,7 @@
 
 Projet collaboratif réalisé avec **Ibrahima Diallo** dans le cadre du cours de Data Mining.
 
-## 🧠 Présentation du Projet
+## Présentation du Projet
 Ce projet porte sur la classification d'images cérébrales (Gliome, Méningiome, Hypophyse ou Absence de tumeur) via une approche de Deep Learning.
 
 ### Étapes principales :
@@ -14,7 +14,7 @@ Ce projet porte sur la classification d'images cérébrales (Gliome, Méningiome
   - **Flattening** et couches **Denses** pour la classification finale.
 - **Résultats :** Précision de **98%** sur l'ensemble de test en utilisant l'optimiseur Adam.
 
-## 🛠 Technologies utilisées
+## Technologies utilisées
 - **Framework :** TensorFlow / Keras
 - **Environnement :** Jupyter Notebook (Python)
 - **Visualisation :** Matplotlib, Seaborn
